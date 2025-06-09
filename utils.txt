@@ -19,6 +19,19 @@ Check if the topic was created
 
 5. python3 send_events.py 
 
+let this to send messages
+
+!! BE SURE THAT KAFKA WORKS IN CONTAINER : PING KAFKA
+
+IF NOT, RUN : docker network connect online-shopping-analysis-and-real-time-recommendations_default pyflink in bash
+
+6. Open 3 terminals
+
+1) run : python3 ws_server.py
+2) run : python3 popular_products | python3 relay.py
+3) run : python3 -m http.server 8000
+
+
 The above command will read the "2020-Feb.csv" file (our dataset) and will send events one by one 
 to Kafka.
 

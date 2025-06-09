@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Live Cart Abandonments</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f7f9fb;
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      font-size: 2rem;
+      margin-bottom: 24px;
+    }
+
+    ul#events {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul#events li {
+      background: #fdfdfd;
+      margin-bottom: 10px;
+      padding: 14px 20px;
+      border-radius: 8px;
+      border-left: 6px solid #e74c3c;
+      font-size: 1rem;
+      color: #444;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Live Cart Abandonments</h2>
+  <ul id="events"></ul>
+</div>
+
+<script>
+  const eventList = document.getElementById('events');
+  const ws = new WebSocket("ws://localhost:6789"); // adjust port as needed
+
+  ws.onopen = () => {
+    console.log("Connected to WebSocket for abandonment events");
+  };
+
+  ws.onmessage = event => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.event === "abandoned_cart") {
+        const li = document.createElement('li');
+        const time = new Date(data.timestamp).toLocaleTimeString();
+        li.textContent = `[${time}] User ${data.user_id} abandoned product ${data.product_id}`;
+        eventList.prepend(li);
+        if (eventList.children.length > 30) {
+          eventList.removeChild(eventList.lastChild);
+        }
+      }
+    } catch (err) {
+      console.error("Invalid message:", err);
+    }
+  };
+
+  ws.onerror = err => {
+    console.error("WebSocket error:", err);
+  };
+</script>
+</body>
+</html>

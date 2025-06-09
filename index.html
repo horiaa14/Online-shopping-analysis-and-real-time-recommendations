@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Real-time Product Counts</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+  }
+
+  /* Container */
+  .chart-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    padding: 30px 40px;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  h2 {
+    margin-bottom: 24px;
+    color: #333;
+    font-weight: 700;
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  canvas {
+    /* Responsive */
+    width: 100% !important;
+    height: 400px !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="chart-card">
+  <h2>Real-time Product Counts</h2>
+  <canvas id="chart"></canvas>
+</div>
+
+<div style="text-align: center; margin-bottom: 20px;">
+  <a href="counts.html" style="margin-right: 20px;">🔢 Product Counts</a>
+  <a href="abandonments.html">🛒 Cart Abandonments</a>
+</div>
+
+<script>
+  const ctx = document.getElementById('chart').getContext('2d');
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+  gradient.addColorStop(0, 'rgba(75, 192, 192, 0.8)');
+  gradient.addColorStop(1, 'rgba(54, 162, 235, 0.8)');
+
+  const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Count',
+        data: [],
+        backgroundColor: gradient,
+        borderRadius: 6,
+        borderSkipped: false,
+        maxBarThickness: 50,
+      }]
+    },
+    options: {
+      animation: {
+        duration: 500,
+        easing: 'easeOutQuart'
+      },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            font: {
+              size: 16,
+              weight: '600',
+            },
+            color: '#555',
+          }
+        },
+        tooltip: {
+          backgroundColor: '#222',
+          titleFont: { size: 16, weight: '700' },
+          bodyFont: { size: 14 },
+          padding: 10,
+          cornerRadius: 8,
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#444',
+            font: {
+              size: 14,
+              weight: '600'
+            }
+          },
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1,
+            color: '#444',
+            font: {
+              size: 14,
+              weight: '600'
+            }
+          },
+          grid: {
+            borderDash: [4, 6],
+            color: '#ddd'
+          }
+        }
+      }
+    }
+  });
+
+  const counts = {};
+
+  const ws = new WebSocket("ws://localhost:6789");
+
+  ws.onopen = () => {
+    console.log("Connected to WebSocket");
+  };
+
+  ws.onmessage = event => {
+    const [product, countStr] = event.data.split(":");
+    const count = parseInt(countStr, 10);
+
+    counts[product] = count;
+
+    chart.data.labels = Object.keys(counts);
+    chart.data.datasets[0].data = Object.values(counts);
+    chart.update();
+  };
+
+  ws.onerror = err => {
+    console.error("WebSocket error:", err);
+  };
+</script>
+
+</body>
+</html>
