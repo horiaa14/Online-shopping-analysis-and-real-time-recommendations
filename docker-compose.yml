@@ -60,6 +60,8 @@ services:
       dockerfile: Dockerfile.pyflink
     container_name: pyflink
     entrypoint: ["/bin/bash", "-c", "tail -f /dev/null"]
+    ports:
+    - "8000:8000"
     depends_on:
       - kafka
       - jobmanager

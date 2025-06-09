@@ -28,7 +28,7 @@ IF NOT, RUN : docker network connect online-shopping-analysis-and-real-time-reco
 6. Open 3 terminals
 
 1) run : python3 ws_server.py
-2) run : python3 popular_products | python3 relay.py
+2) run : python3 popular_products | python3 relay.py : daca da eroare baga : ln -s /usr/bin/python3 /usr/bin/python
 3) run : python3 -m http.server 8000
 
 
